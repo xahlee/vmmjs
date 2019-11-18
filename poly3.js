@@ -24,17 +24,18 @@ let vertices;
 // array, each element represent a face of polyhedron. It's index of the vertices
 let faceIndexes;
 
+// array, each element represent a edge of polyhedron. It's index of the vertices
+let edgeIndexes;
+
 // initVertices("cube") will fill the values of global variables vertices and faceIndexes.
 // arguments must be string, one of "tetrahedron", "cube", etc
 const initVertices = ((polyhedronName) => {
-
     const v = 10;
     const vo = 15;
     const gg = vo*(Math.sqrt(5)-1)/2;
     const hd = v*(Math.sqrt(5)+1)/2;
     const gd = v*(Math.sqrt(5)-1)/2;
 
-    // polyData is polyhedron's vertices data. It has the form { tetrahedron: data , cube: data, octahedron: data}, each data has the form {vertices:..., faces:...}
     const polyData = {
         "tetrahedron": {
             "vertices": [
@@ -45,9 +46,9 @@ const initVertices = ((polyhedronName) => {
             ],
             "faces":[
                 [0,1,2],
-                [0,3,1],
-                [3,2,0],
-                [2,3,1]
+                [1,0,3],
+                [2,3,0],
+                [3,2,1]
             ]
         },
         "cube": {
@@ -108,16 +109,24 @@ const initVertices = ((polyhedronName) => {
             "faces":[
                 [0,1,4],
                 [1,0,6],
-                [2,3,5],
-                [3,2,7],
+                [4,8,0],
+                [9,6,0],
+                [8,9,0],
                 [4,5,8],
-                [5,4,10],
+                [8,5,2],
+                [11,1,6],
+                [5,3,2],
+                [7,2,3],
+                [2,7,9],
+                [11,7,3],
                 [6,7,11],
                 [7,6,9],
-                [8,9,0],
                 [9,8,2],
-                [10,11,3],
+                [5,4,10],
+                [10,4,1],
                 [11,10,1],
+                [10,11,3],
+                [5,10,3],
             ]
         },
         "dodecahedron": {
@@ -159,15 +168,46 @@ const initVertices = ((polyhedronName) => {
             ]
         }
     };
-    vertices = polyData[polyhedronName].vertices;
-    faceIndexes = polyData[polyhedronName].faces;
+
+    vertices= polyData[polyhedronMenu.value].vertices;
+    faceIndexes= polyData[polyhedronMenu.value].faces;
 });
 
-// rotateState is a array [angleX,angleY,angleZ], means the object is rotated by angleX angleY angleZ. The angles are in degrees
-// let rotateState = [0,0,0];
+/* [
+   getEdgeIndex(faceIndex) return edge index of faceIndex
+   example, getEdgeIndex([3,4,5]) returns
+   [ [ 3, 4 ], [ 4, 5 ], [ 5, 3 ] ]
+   ] */
+const getEdgeIndex = ((faceIndex) => {
+    const maxIndex = faceIndex.length -1;
+    const result = [];
+    for (let i = 0; i < maxIndex; i++) {
+        result . push ([faceIndex[i], faceIndex[i+1]] );
+    }
+    result . push ([faceIndex[maxIndex], faceIndex[0]] );
+    return result;
+});
+
+/* [
+   getEdgeIndexes(faceIndexes) returns edge indexes based on faceIndexes
+   example
+   getEdgeIndexes([[2,3,4,5], [6,7,8]])
+   return
+   [
+   [ [ 2, 3 ], [ 3, 4 ], [ 4, 5 ], [ 5, 2 ] ],
+   [ [ 6, 7 ], [ 7, 8 ], [ 8, 6 ] ]
+   ]
+   ] */
+const getEdgeIndexes = ((faceIndexes) => faceIndexes . map ( ((x) => getEdgeIndex(x)) ) );
+
+// initEdgeIndexes() fill the var edgeIndexes, based on current value of faceIndexes
+const initEdgeIndexes = (() => { getEdgeIndexes (faceIndexes) })
 
 // getFace(j) return a array, each element is coordinate of a vertex of the face number j
 const getFace = ((j) => faceIndexes[j] . map ((x) => vertices[x]) );
+
+// getCentroid(points) returns the centroid of list of points
+const getCentroid = ((pts) => pts . reduce (([a,b,c],[x,y,z]) => [a+x, b+y, c+z ]) .map ((x) => x / pts.length) );
 
 // rotate data around X axis
 const rotX = ((deg) => {
@@ -215,11 +255,11 @@ const zProj = (([x,y,z]) => [x,y]);
 
 // createSvgFace(j) creates a svg polygon element and return it. j is a int
 const createSvgFace = ((j) => {
-    const projectedFace = getFace(j). map( zProj );
-    let poly = document.createElementNS("http://www.w3.org/2000/svg","polygon");
-    poly.setAttribute("points", projectedFace .toString());
-    poly.setAttribute("style", `fill:rgb(100%, 75%, 79%, 0.5);stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
-    return poly;
+        const projectedFace = getFace(j). map( zProj );
+        let poly = document.createElementNS("http://www.w3.org/2000/svg","polygon");
+        poly.setAttribute("points", projectedFace .toString());
+        poly.setAttribute("style", `fill:rgb(100%, 75%, 79%, 0.5);stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
+        return poly;
 });
 
 // const setRotateState = ((key) => {
@@ -248,18 +288,22 @@ const doKeyPress = ((key) => {
 
 const render = () => {
     svgEl . innerHTML = "";
-    faceIndexes.forEach( (x,j) => { svgEl.appendChild(createSvgFace(j)); } );
+    faceIndexes . forEach ((x_ , j) => {
+        const zCoord = getCentroid(getFace(j))[2];
+        if (zCoord >= 0) {svgEl.appendChild(createSvgFace(j));}
+    })
 };
 
 let rotateTimerId;
 
 const toggleAutoRotation = (() => {
-        if ( checkboxRotate.checked ) {
-            rotateTimerId = setInterval ((() => { rotY(3) ; render();}), 100); }
-        else { clearInterval (rotateTimerId); render()} });
+    if ( checkboxRotate.checked ) {
+        rotateTimerId = setInterval ((() => { rotY(3) ; render();}), 100); }
+    else { clearInterval (rotateTimerId); render()}; });
 
 const init = (() => {
     initVertices(polyhedronMenu.value);
+    initEdgeIndexes();
     rotX(10);
     rotY(10);
     toggleAutoRotation();
