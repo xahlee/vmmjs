@@ -467,6 +467,14 @@ const rotZ = ((deg) => {
 }
              );
              
+const dotProdS = ((sing1, sing2) => {  
+								let dp = 0;
+								for (k=0; k < sing1.length; k++) {
+								dp = dp + sing1[k] * sing2[k];
+								}
+					return dp;
+	});
+             
 // ============== In these routines the look of each face is decided ===========
 // viewLength is changed in an input field and is used for all polyhedra
 // const zProj  = (([x,y,z]) => {zProjL([x,y,z],viewLength) } ); does not work

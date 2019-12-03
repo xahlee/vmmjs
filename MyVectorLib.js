@@ -85,14 +85,23 @@ const scaleX = ((scv,pts) => { let scpts = [];
 
 // linCombPts gives the linear combination of two arrays of numbers
 // Format: pt1[i] = coordinate vector [x1, x2, x3] -- also other than dim = 3
-const linCombPts = ((a1,a2,pt1,pt2) => { let cpt = [];
-                                 for(i=0; i < pt1.length; i++)   {cpt[i] = []}
-                                 for(i=0; i < pt1.length; i++)       {
-                                 	for(k=0; k < pt1[0].length; k++) {
-                                 	cpt[i][k] = a1*pt1[i][k] + a2*pt2[i][k]
+const linCombPtsS = ((a1,a2,pt1,pt2) => { let cp = [];
+                                 	for(k=0; k < 3; k++) {
+                                 	cp[k] = a1*pt1[k] + a2*pt2[k];
+                                 }
+                    return cp;
+	});
+function linCombPts(a1,a2,pt1,pt2) { let cpt = [];
+							if (!Array.isArray(pt1[0]) )  {
+								cpt = linCombPtsS(a1,a2,pt1,pt2);
+							  }
+							 else{
+                                 for(i=0; i < pt1.length; i++)   {cpt[i] = []} // initialization
+                                 for(i=0; i < pt1.length; i++)   {
+                                 	cpt[i] = linCombPtsS(a1,a2,pt1[i],pt2[i]);
                                  }}
                     return cpt;
-	});
+	}
 	
 // example: dotProdS([1,2,3], [4, -5, 1]) NOT arrays of points. Dimension <> 3 is allowed
 const dotProdS = ((sing1, sing2) => {  
@@ -154,14 +163,20 @@ const rot180PtsAround = ((axis, pts) => {
 
 // ----------  Below NOT finished ------------------------------------------
 
-
+const rotY2S = ((deg,vtc) => {
+		let p = [];
+    	const cd = Math.cos(Math.PI/180 * deg);
+    	const sd = Math.sin(Math.PI/180 * deg);
+     	p[0] =   cd * vtc[0] + sd  * vtc[2];
+     	p[1] = vtc[1];
+     	p[2] =  -sd * vtc[0] + cd  * vtc[2];
+	return p;
+});
 const rotY2 = ((deg,vtcs) => {
-    const cd = Math.cos(Math.PI/180 * deg);
-    const sd = Math.sin(Math.PI/180 * deg);
-    vtcs = vtcs . map ( ([x,y,z]) => [
-        cd * x + sd  * z ,
-        y,
-        -sd * x + cd  * z ] );
+   		let pv = [];
+   		for (i=0; i < 3; i++)       {
+   		pv[i] = rotY2S(deg,vtcs[i]); }
+	return pv;   		
 }
              );
                           
