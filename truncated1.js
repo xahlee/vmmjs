@@ -55,8 +55,7 @@ const etrunc   = "etrunc";  // edge truncation
 const strunc   = "strunc";  // snub truncation
 let truncationMode  = regular;
 let truncationFlag  = (truncationMode == vtrunc)||(truncationMode == etrunc)||(truncationMode==strunc);
-
-
+truncateMenu.update;
 
 
 // ==== EXPLANATION of GLOBALS for PLATONIC polyhedra. The truncated polyhedra get other names.========
@@ -342,26 +341,26 @@ const getVFaceIndexes= (() =>
 			         //console.log("j:",j,"vertexStar[j][ec] = ",vertexStar[j][ec]," vFaceIndexes[j][ec] = ",edge2num[j] [vertexStar[j][ec][1]]);
 			        } //console.log("j:",j,"vertexStar[j] = ",vertexStar[j]);
 			    }
-			console.log("get here?");
-				console.log("edge2num=",edge2num);
+				//console.log("First Part of getVFaceIndexes: ","edge2num=",edge2num);
+				
 			// the nearer vVertex on an edge has the same number as this edge
 			const faceLength = faceIndexes[0].length;
 			for (j = 0; j < numFaces; j++)
-			 	{    let currentEdge = [];          console.log(j,"th face=",faceIndexes[j] );
+			 	{    let currentEdge = [];        //  console.log(j,"th face=",faceIndexes[j] );
 			 	 	 let currentEdgeNum = -1;
 			 	 	 let inverseEdgeNum = -1;
 			 	for (ec = 0; ec < faceLength; ec++) 
 			 		{  currentEdge = [ faceIndexes[j][ec], faceIndexes[j][(ec+1)%faceLength] ];
 			 		   currentEdgeNum = edge2num[currentEdge[0]] [currentEdge[1]];
 			 		   inverseEdgeNum = edge2num[currentEdge[1]] [currentEdge[0]];
-			 		console.log("currentEdge= ",currentEdge, currentEdgeNum,inverseEdgeNum);
+			 		//console.log("currentEdge= ",currentEdge, currentEdgeNum,inverseEdgeNum);
 			 			vFaceIndexes[numVertices + j][2*ec]     = edge2num[currentEdge[0]] [currentEdge[1]];
 			 			vFaceIndexes[numVertices + j][(2*ec+1)] = edge2num[currentEdge[1]] [currentEdge[0]];			 			
 			 	  	}
 		
 		//console.log("vFaceIndexes[numVertices + j][all]= ",vFaceIndexes[numVertices + j]);
 				}
-				console.log("vFaceIndexes=",vFaceIndexes);
+			//	console.log("vFaceIndexes=",vFaceIndexes);
 			} );
 	
 	//checkTruncDetailsF();
@@ -495,7 +494,7 @@ function zProj(pts) { let results = [];
 
 const projectedFaceFct = ((j,faceInd,vert) => { let ff = []; let pf = [];
                     ff = getFace(j,faceInd,vert); 
-                        console.log("projectedFace ",j,faceInd[j],vert[j]);
+                       // console.log("projectedFace ",j,faceInd[j],vert[j]);
                     for (i=0; i < ff.length; i++) {
                          pf[i] = zProjS(ff[i]);
                      } 
@@ -548,8 +547,7 @@ const createSvgTVFace = ((j,zCoord) => {
         const vProjectedFace = projectedFaceFct(j,vFaceIndexes,vVertices);
         let vpoly = document.createElementNS("http://www.w3.org/2000/svg","polygon");
         vpoly.setAttribute("points", vProjectedFace .toString());
-        console.log("so farfar ok", j);
-         console.log("vFaceIndexes[",j,"]= ",vFaceIndexes[j],vFaceIndexes[j][2], vVertices[vFaceIndexes[j][2]]);
+     // console.log("vFaceIndexes[",j,"]= ",vFaceIndexes[j],vFaceIndexes[j][2], vVertices[vFaceIndexes[j][2]]);
 
   if (renderstyle == patch) {    
     if (zCoord >= 0)
@@ -755,8 +753,9 @@ const getRenderStyle = ((renderName) => {
    if (renderMenu.value == "black") {mybackground = "black"; extra = 1};
    if (renderMenu.value == "white") {mybackground = "white"; extra = 1};
    if (extra == 1) {
-      document.body.style.backgroundColor = mybackground;}
-   console.log(renderstyle, projType, mybackground, viewLength);
+      	document.body.style.backgroundColor = mybackground;}
+	truncationFlag = (truncationMode == vtrunc)||(truncationMode == etrunc)||(truncationMode == strunc);
+	console.log(renderstyle, projType, mybackground, viewLength,truncationFlag);
 });
 
 const gettruncationMode = ((truncateName) => {
@@ -764,7 +763,7 @@ const gettruncationMode = ((truncateName) => {
 	if (truncateMenu.value == "vtrunc")  {truncationMode = vtrunc};
 	if (truncateMenu.value == "etrunc")  {truncationMode = etrunc};
 	if (truncateMenu.value == "strunc")  {truncationMode = strunc};
-	if (truncateMenu.value != "regular") {truncationFlag = true};
+	truncationFlag = (truncationMode == vtrunc)||(truncationMode == etrunc)||(truncationMode == strunc);
 	//console.log(truncationMode, truncParam);
 });
 
