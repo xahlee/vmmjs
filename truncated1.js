@@ -43,6 +43,7 @@ let viewPoint  = (0,0,viewLength);
 const ortho    = "ortho"; // orthogonal
 const persp    = "persp"; // perspective
 let projType   = persp;
+let renderVal  = "patchstyle";  // needed for "refresh"
 
 // For changing the truncation parameter
 let truncParam = 16; // max = 48
@@ -55,8 +56,8 @@ const etrunc   = "etrunc";  // edge truncation
 const strunc   = "strunc";  // snub truncation
 let truncationMode  = regular;
 let truncationFlag  = (truncationMode == vtrunc)||(truncationMode == etrunc)||(truncationMode==strunc);
-truncateMenu.update;
-
+truncateMenu.value = truncationMode; // refresh ok
+renderMenu.value   = renderVal;
 
 // ==== EXPLANATION of GLOBALS for PLATONIC polyhedra. The truncated polyhedra get other names.========
 // number of vertices = vertices.length; vertices[i] = 3D-coordinates of the i.th vertex
@@ -236,7 +237,8 @@ const initVertices = ((polyhedronName) => {
     // These are needed for the truncation. They are only recomputed when the platonic changes
     getEdgeIndexes();
     getVertexStars();
-    getVFaceIndexes();  
+    if (truncationMode == vtrunc) {getVFaceIndexes();}
+    if (truncationMode == etrunc) {getEFaceIndexes();}
 // =========== These index computations are done only once for each polyhedron =====
 // ======= vertices and vVertices are rotated; vVertices depend on vParam ==========
 });
@@ -325,7 +327,7 @@ const checkTruncDetailsF = (() => {          // ======== helps debugging the fol
 
 const getVFaceIndexes= (() =>
            {	
-	 			vFaceIndexes = []; // 
+	 		vFaceIndexes = []; // 
 			for (j = 0; j < numVertices + numFaces ; j++) { // + numFaces
 			    vFaceIndexes[j] = [];          }  // initialize as double array
 											  
@@ -364,6 +366,52 @@ const getVFaceIndexes= (() =>
 			} );
 	
 	//checkTruncDetailsF();
+	
+const getEFaceIndexes= (() =>   // stored in vFaceIndexes
+           {	vFaceIndexes = [];
+                let ke     = -1;       // edgeNumber
+                let nextV  = -1;       // vVertexNumber underneath a platonic vertex
+                const auxV = numFaces + numVertices; // first two groups of faces
+                const numFaceVert = faceIndexes[0].length;
+                currentEdge  = []; 
+                
+			for (j = 0; j < numFaces + numVertices + numEdges/2; j++) { //
+			    vFaceIndexes[j] = [];          }  // initialize as double array
+											  
+			for (j = 0; j < numFaces; j++)  // Faces inside old faces
+				{
+			    for (ec = 0; ec < numFaceVert; ec++)
+						vFaceIndexes[j][ec] = j*numFaceVert + ec; // Faces inside the old Faces
+			    }
+			    
+			for (j = 0; j < numVertices; j++) // Faces underneath vertices
+				{
+			    for (ec = 0; ec < edgesFromVertex; ec++)
+			    	{
+			    		currentEdge = vertexStar[j][ec];  // ke = number of ec.th edge from vertex j
+			    		//console.log("vertexStar[j][ec] ",vertexStar[j][ec],currentEdge,currentEdge[2],currentEdge[3]);
+						nextV = currentEdge[2] * numFaceVert + currentEdge[3];
+						vFaceIndexes[numFaces+j][ec] = nextV; 
+					}
+			    }
+			    
+				ke = 0;
+			   	for (j=0; j < numEdges; j++) 
+				{
+					currentEdge = edgeIndexes[j];
+					//currentEdge[2] is the faceNum of this edge 
+					if (currentEdge[0] < currentEdge[1])  // below we use both sides of the edge
+					{
+			    	  vFaceIndexes[auxV + ke][0] = currentEdge[2] * numFaceVert + currentEdge[3];
+			    	  vFaceIndexes[auxV + ke][1] = currentEdge[2] * numFaceVert + (currentEdge[3]+1)%numFaceVert;
+			    	  currentEdge = edgeIndexes[getInverseEdge(j)];
+			    	  vFaceIndexes[auxV + ke][2] = currentEdge[2] * numFaceVert + currentEdge[3];
+			    	  vFaceIndexes[auxV + ke][3] = currentEdge[2] * numFaceVert + (currentEdge[3]+1)%numFaceVert;
+			    	  ke++;
+			    	}
+			    }
+				
+			} );
   
 // const getCentroid = ((pts) => pts . reduce (([a,b,c],[x,y,z]) => [a+x, b+y, c+z ]) .map ((x) => x / pts.length) );
 // now in:  MyVectorLib.js:  getCentroid(facePoints) returns the centroid of the face
@@ -386,7 +434,7 @@ const checkTruncDetailsV = (() => {         // ======== helps debugging the foll
 });
  
 const getVTrunc = (() => {
-
+			vVertices = [];
 		   let p0 = []; let p1 = [];
            for (k = 0; k < numEdges; k++) {
                 vVertices[k] = [];        }  // initialize as 2D-array
@@ -406,6 +454,34 @@ const getVTrunc = (() => {
             	// vVertex[k] lies on the k.th edge
 			}
 	// checkTruncDetailsV();		//looks good	
+ 
+		}
+			);
+			
+ 
+const getETrunc = (() => {
+				vVertices = [];
+				const numEVertices = numFaces * faceIndexes[0].length;
+				for (k = 0; k < numEVertices; k++) {
+                vVertices[k] =  [];        }  // initialize as 2D-array
+                let jMidpoint = [];
+                let curVertex = [];
+                let vc        = 0;            // counting index  
+                let cfj       = -1;
+                
+                for (j=0; j < numFaces; j++)
+                {	
+                	jMidpoint = getFaceMidpoint(getFace(j,faceIndexes,vertices));
+                	for (cf = 0; cf < faceIndexes[0].length; cf++)
+                    {
+                    	curVertex = vertices[faceIndexes[j][cf]]; // vertexNr cf in faceNr j
+                    	for (k = 0; k < 3; k++)
+                    	{
+                    	vVertices[vc][k] = (1-2*vParam) * curVertex[k]  + 2*vParam * jMidpoint[k];
+                    	}
+                    	vc++;
+                    }
+                }
  
 		}
 			);
@@ -466,7 +542,7 @@ const rotZ = ((deg) => {
 }
              );
              
-const dotProdS = ((sing1, sing2) => {  
+const dotProd1 = ((sing1, sing2) => {  
 								let dp = 0;
 								for (k=0; k < sing1.length; k++) {
 								dp = dp + sing1[k] * sing2[k];
@@ -513,7 +589,7 @@ const createSvgFace = ((j,zCoord) => {
      {if (mybackground == "black") 
            poly.setAttribute("style", `fill:rgb(100%,100%,0%);stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
       else
-           poly.setAttribute("style", `fill:rgb(5%,5%,5%);stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
+           poly.setAttribute("style", `fill:rgb(15%,90%,90%);stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
      }
     else // lower part
     {
@@ -554,7 +630,7 @@ const createSvgTVFace = ((j,zCoord) => {
      {if (mybackground == "black") 
            vpoly.setAttribute("style", `fill:rgb(100%,100%,0%);stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
       else
-           vpoly.setAttribute("style", `fill:rgb(5%,5%,5%);stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
+           vpoly.setAttribute("style", `fill:rgb(15%,90%,90%);stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
      }
     else // lower part
 			vpoly.setAttribute("style", `fill:none;stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
@@ -618,7 +694,7 @@ const visible = ((j) => { let midpoint = [];
    midpt  = getFaceMidpoint(getFace(j,faceIndexes,vertices));
    let result = midpt[2];
    if (projType == persp) {
-   		result = dotProdS(midpt, viewVector(midpt));
+   		result = dotProd1(midpt, viewVector(midpt));
    }
    return result; 
 });
@@ -627,25 +703,27 @@ const TVvisible = ((j) => { let vMidpt = [];
    vMidpt  = getFaceMidpoint(getFace(j,vFaceIndexes,vVertices));
    let result = vMidpt[2];
    if (projType == persp) {
-   		result = dotProdS(vMidpt, viewVector(vMidpt));
+   		result = dotProd1(vMidpt, viewVector(vMidpt));
    }
    return result; 
 });
  
 // In render() the created svgEl are put to the screen; order matters
 const render = () => {
-    getVTrunc();
+    if (truncationMode == vtrunc) { getVFaceIndexes(); getVTrunc(); }
+    if (truncationMode == etrunc) { getEFaceIndexes(); getETrunc(); }
+     
     svgEl . innerHTML = "";
     let zCoord;
      
     if (renderstyle == patch) 
     {
-	   if ( truncationMode == regular)          {
+	   if ( !truncationFlag )          {
 	   for (j = 0; j < faceIndexes.length; j++) {
        		zCoord = visible(j);
        		if (zCoord >= 0) {svgEl.appendChild(createSvgFace(j,zCoord));} 
        }}
-	if ( truncationFlag )                             {
+	if ( truncationFlag)                             {
 	   		for (j = 0; j < vFaceIndexes.length; j++) {
        			zCoord = TVvisible(j);
        			if (zCoord >= 0) 
@@ -655,7 +733,7 @@ const render = () => {
 	   
 	 if (renderstyle == wire) 
 	 { 
-	   if ( truncationMode = regular) {
+	   if ( !truncationFlag ) {
 	   drawLine = overl;
 	   for (j = 0; j < faceIndexes.length; j++) {
               zCoord = visible(j);
@@ -671,7 +749,7 @@ const render = () => {
 	          }
 	    }}
 	    
-	    if ( truncationMode = regular) {
+	    if ( truncationMode == regular ) {
 	    drawLine = underl;  // Top parts here
 	    for (j = 0; j < faceIndexes.length; j++) {
 	          {
@@ -689,14 +767,24 @@ const render = () => {
 	          }
 	    }}
 	    
-	    if ( truncationFlag )                     {
+	    if ( truncationFlag  )                    {
+	    drawLine = underl;
 	    for (j = 0; j < vFaceIndexes.length; j++) {
 	          {
 	            zCoord = TVvisible(j);
 	            if (zCoord >= 0)
 	               svgEl.appendChild(createSvgTVFace(j,zCoord));
 	          }
-	    }}
+	    	}
+	    drawLine = overl;
+	    for (j = 0; j < vFaceIndexes.length; j++) {
+	          {
+	            zCoord = TVvisible(j);
+	            if (zCoord >= 0)
+	               svgEl.appendChild(createSvgTVFace(j,zCoord));
+	          }
+	    	}
+	    }
 	 } // end wire    
 };
 
@@ -746,6 +834,7 @@ const doKeyPress = ((key) => {
 
 const getRenderStyle = ((renderName) => {
    let extra = 0;
+   renderVal = renderMenu.value;
    if (renderMenu.value == "patchstyle") {renderstyle = patch};
    if (renderMenu.value == "wireframe")  {renderstyle = wire};
    if (renderMenu.value == "ortho") {projType = ortho}; 
@@ -754,7 +843,6 @@ const getRenderStyle = ((renderName) => {
    if (renderMenu.value == "white") {mybackground = "white"; extra = 1};
    if (extra == 1) {
       	document.body.style.backgroundColor = mybackground;}
-	truncationFlag = (truncationMode == vtrunc)||(truncationMode == etrunc)||(truncationMode == strunc);
 	console.log(renderstyle, projType, mybackground, viewLength,truncationFlag);
 });
 
@@ -764,7 +852,6 @@ const gettruncationMode = ((truncateName) => {
 	if (truncateMenu.value == "etrunc")  {truncationMode = etrunc};
 	if (truncateMenu.value == "strunc")  {truncationMode = strunc};
 	truncationFlag = (truncationMode == vtrunc)||(truncationMode == etrunc)||(truncationMode == strunc);
-	//console.log(truncationMode, truncParam);
 });
 
 inputViewDist.value = viewLength;
@@ -778,6 +865,8 @@ inputTruncParam.value = truncParam;
 function TruncParam() {
 truncParam = inputTruncParam.value;
 vParam     = truncParam/96;
+if (truncationMode == vtrunc) {getVFaceIndexes();}
+if (truncationMode == etrunc) {getEFaceIndexes();}
 render();
 }
 
@@ -791,9 +880,11 @@ const toggleAutoRotation = (() => {
 const init = (() => {
     document.body.style.backgroundColor = mybackground;
     initVertices(polyhedronMenu.value);
-    getVTrunc();
-    //rotX(10);
-    //rotY(10);
+    if (truncationMode == vtrunc) { getVTrunc(); }
+   // getVTrunc();
+    if (truncationMode == etrunc) { getETrunc(); }
+    rotX(20);
+    rotY(30);
     toggleAutoRotation();
     //checkComputedData();
     //checkTruncComputation();
