@@ -1231,12 +1231,12 @@ init();
     
     checkboxRotate.addEventListener ('change', toggleAutoRotation , false);
   
-	inputOrtho.addEventListener("input", OrthoPersp);
-	inputPersp.addEventListener("input", OrthoPersp);
-	inputBlack.addEventListener("input", BlackWhite);
-	inputWhite.addEventListener("input", BlackWhite);
-	inputPatchStyle.addEventListener("input", PatchWire);
-	inputWireFrame.addEventListener("input", PatchWire);
+	inputOrtho.addEventListener("change", OrthoPersp);
+	inputPersp.addEventListener("change", OrthoPersp);
+	inputBlack.addEventListener("change", BlackWhite);
+	inputWhite.addEventListener("change", BlackWhite);
+	inputPatchStyle.addEventListener("change", PatchWire);
+	inputWireFrame.addEventListener("change", PatchWire);
 	
     inputViewDist . addEventListener("change", ViewDist);
     inputTruncParam.addEventListener("change", TruncParam);
