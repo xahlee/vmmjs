@@ -598,7 +598,7 @@ const getSTrunc = (() => {  // the e-vertices have to be rotated in the original
                 	return cor;
                 } );
              
-            	 
+            	vParam = Math.max(vParam, 1.0/1024);
             	let ev = 0; ang = 0; angp = 0;  angn = 0;
          	while  (ev < 5)  {  // Repeat computation with different angle
                 jMidpoint = [];
