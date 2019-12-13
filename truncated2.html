@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Polyhedron</title>
+	</head>
+	<body style="background-color: black; color: cyan;">
+	
+		<style>
+		#svgArea {
+			width: 70%;
+			float: left;
+		}
+		#menuArea{
+			margin-top: 40px;
+			width: 30%;
+			float: left;		
+		}
+		</style>
+
+		<h1 style="text-align: center;">Platonic Polyhedra and their Archimedean Truncations</h1>
+
+		<div id="svgArea">
+		<svg width="40" height="40" viewBox="-20 -20 40 40">
+			</svg>
+		</div>
+
+		<div id="menuArea">		
+			<table>
+				<tr><th/><th/><th/><th/><th/></tr>
+				<tr>
+					<td><label for="polyhedronMenu">Polyhedron:&nbsp;</label></td>
+					<td><select id="polyhedronMenu" size="1">
+							<option value="icosahedron">icosahedron</option>
+							<option value="dodecahedron">dodecahedron</option>
+							<option value="octahedron">octahedron</option>
+							<option value="cube" selected="">cube</option>
+							<option value="tetrahedron">tetrahedron</option>
+						</select>
+					</td>
+				</tr>
+				<tr><td><br></td></tr>
+				<tr>
+					<td>Truncation Mode:</td>
+					<td>
+						<select id="truncateMenu" size="1">
+							<option value="regular" selected="">no truncation</option>
+							<option value="vtrunc">vertex truncation</option>
+							<option value="etrunc">edge truncation</option>
+							<option value="strunc">snub truncation</option>
+						</select>
+					</td>
+				</tr>
+					<td><br></td><tr>
+					<td>Truncation Param:</td>
+					<td><input type="number" id="truncParam" min="0" max="48"></td>
+				</tr>
+				<tr><td><br></td></tr>
+				<tr>
+					<td><label for="checkboxRotate">Rotate automatically:</label></td>
+					<td><input id="checkboxRotate" type="checkbox" name="rotate" unchecked=""></td>
+				</tr>
+				<tr><td><br></td></tr>
+				<tr>
+					<td>Render Style:</td>
+					<td>
+						<input type="radio" id="patchstyle" name="rb1" value="patchstyle" checked>
+						<label for="patchstyle"> Patch Style</label> 
+						<br>
+						<input type="radio" id="wireframe" name="rb1" value="wireframe">
+						<label for="wireframe"> Wire Frame</label> 
+					</td>
+				</tr>
+				<tr><td><br></td></tr>
+				<tr>
+					<td>Backgroud Color</td>
+					<td>
+						<input type="radio" id="black" name="rb2" value="black" checked>
+						<label for="black"> Black</label> 
+						<br>
+						<input type="radio" id="white" name="rb2" value="white">
+						<label for="white"> White</label> 
+					</td>
+				</tr>
+				<tr><td><br></td></tr>
+				<tr>
+					<td>Projection:</td>
+					<td>
+						<input type="radio" id="ortho" name="rb3" value="ortho" checked>
+						<label for="ortho"> Orthogonal</label> 
+						<br>
+						<input type="radio" id="persp" name="rb3" value="persp">
+						<label for="persp"> Perspective</label> 
+					</td>
+				</tr>
+				<tr><td><br></td></tr>
+				<tr>
+					<td>View Distance:</td>
+					<td><input type="number" id="viewdist" min="20" max="400"></td>
+				</tr>
+			</table>	
+			<br>
+			<h4>Press arrow keys to rotate step by step</h>
+		</div>
+		
+		<script defer src="truncated2.js"></script>
+	</body>
+</html>
