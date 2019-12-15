@@ -6,23 +6,33 @@
 		<title>Polyhedron</title>
 	
 		<style>
-		#svgArea {
-			width: 70%;
-			float: left;
-		}
+         @media (orientation: landscape)
+         {
+			#svgArea {
+				width: 70%;
+				float: left;
+			}
 		
-		#menuArea{
-			margin-top: 40px;
-			width: 30%;
-			float: left;		
-		}
-		</style>
+			#menuArea{
+				margin-top: 40px;
+				width: 30%;
+				float: left;		
+			}
+		   }
+		  @media (orientation: portrait)
+          {
+            #menuArea{
+                 margin-top: 40px;
+            }
+           }
+        </style>
 
 		</head>
 	<body style="background-color: black; color: cyan;"><h1 style="text-align: center;">Platonic Polyhedra and their Archimedean Truncations</h1>
 
 		<div id="svgArea">
-		<svg width="40" height="40" viewBox="-20 -20 40 40">
+			<svg width="60" height="60" viewBox="-20 -20 40 40">
+		
 			</svg>
 		</div>
 

@@ -242,6 +242,7 @@ const initVertices = ((polyhedronName) => {
 
     numVertices = vertices.length;
     numFaces    = faceIndexes.length;
+    numEdges    = 2*(numVertices+numFaces-2);
     // These are needed for the truncation. They are only recomputed when the platonic changes
     getEdgeIndexes();
     getVertexStars();
@@ -307,7 +308,6 @@ const getEdgeIndexes= (() => {
 	    	k++;
 	    	}
 	}
-	numEdges = k;
 });
 
 // ====== getInverseEdge( number of edge[j1,j2]) = number of inverseEdge[j2,j1]  =======
@@ -507,24 +507,23 @@ const checkTruncDetailsV = (() => {         // ======== helps debugging the foll
 const getVTrunc = (() => {
 			if ( !vDone )  // Do not recompute for rotations in render()
 			{
-				vVertices = [];
-			    let p0 = []; let p1 = [];
-        	    for (k = 0; k < numEdges; k++) {
-                vVertices[k] = [];        }  // initialize as 2D-array
+			    vVertices = [];
+        	    for (j = 0; j < numEdges; j++) {
+                	vVertices[j] = [];             
+                }  // initialize as 2D-array
+                let vec0 = [];
+                let vec1 = [];
+                let vc   = 0;
                 
-           for (k = 0; k < numEdges; k++) {
-            	p0 = vertices[edgeIndexes[k][0]];
-            	p1 = vertices[edgeIndexes[k][1]];
-            	//console.log("k= ",k," EdgeIndexes = ",edgeIndexes[k][0],edgeIndexes[k][1],"  p0, p1 ", p0,p1);
+           for (l = 0; l < numEdges; l++) {          // DO NOT USE INDEX "k" HERE nor in getETrunc
+            	vec0 = vertices[edgeIndexes[vc][0]];
+            	vec1 = vertices[edgeIndexes[vc][1]];
+            	//console.log("vc= ",vc," EdgeIndexes = ",edgeIndexes[vc][0],edgeIndexes[vc][1],"  vec0, vec1 ", vec0,vec1);
             	//This check is ok
-            	let p2 = [];  // without this one gets all vVertices the same
-            	for (l=0; l < 3; l++)  {
-            							p2[l] = (1 - vParam) * p0[l] + vParam * p1[l];
-            							}
-            	vVertices[k] = p2;
-            	                   //p2 = linCombPts(1 - vParam,vParam,p0,p1); Why does this not work ??
-            	// on each oriented edge we have one vertex of the edge truncation
-            	// vVertex[k] lies on the k.th edge
+            	vVertices[vc] = linComb1(1 - vParam, vParam, vec0, vec1);
+            	// on each oriented edge we have one vertex of the vertex truncation
+            	// and vVertex[vc] lies on the vc.th edge
+            vc++;
 			}
 	// checkTruncDetailsV();		//looks good	
  			vDone = true;
@@ -538,7 +537,7 @@ const getETrunc = (() => {
 				vVertices = [];
 				const numEVertices = numFaces * faceIndexes[0].length;
 				for (k = 0; k < numEVertices; k++) {
-                vVertices[k] =  [];        }  // initialize as 2D-array
+                vVertices[k] =  [];                }  // initialize as 2D-array
                 let jMidpoint = [];
                 let curVertex = [];
                 let vc        = 0;            // counting index  
@@ -549,10 +548,11 @@ const getETrunc = (() => {
                 	for (cf = 0; cf < faceIndexes[0].length; cf++)
                     {
                     	curVertex = vertices[faceIndexes[j][cf]]; // vertexNr cf in faceNr j
-                    	for (k = 0; k < 3; k++)
+                    	vVertices[vc] = linComb1((1-2*vParam), 2*vParam, curVertex, jMidpoint);
+                    /*	for (k = 0; k < 3; k++)
                     	{
                     	vVertices[vc][k] = (1-2*vParam) * curVertex[k]  + 2*vParam * jMidpoint[k];
-                    	}
+                    	} */
                     	vc++;
                     }
                 }
@@ -619,10 +619,7 @@ const getSTrunc = (() => {  // the e-vertices have to be rotated in the original
                 	for (cf = 0; cf < faceIndexes[0].length; cf++)
                     {
                     	curVertex = vertices[faceIndexes[j][cf]]; // vertexNr cf in faceNr j
-                    	for (k = 0; k < 3; k++)
-                    	{
-                    	auxV[k] = (1-vParam * polyCor()) * curVertex[k]  + vParam * polyCor() * jMidpoint[k];
-                    	}
+                    	auxV =  linComb1((1 - vParam * polyCor()), vParam * polyCor(), curVertex, jMidpoint);
                     	vVertices[vc] = rotateInFace(ang, auxV, jMidpoint, firstVert);
                     	vc++;  			 // const rotateInFace =((ang,qpt,midp,fvert)
                     }
@@ -749,6 +746,14 @@ const dotProd1 = ((sing1, sing2) => {
 					return dp;
 	});
 	
+const dotProda = ((sina1, sina2) => {  
+							let dp = [];
+							for (j=0; j < sina2.length; j++)
+							{	dp[j] = dotProd1(sina1[j],sina2[j]);
+							}
+					return dp;
+	});
+	
 const norm1 = ((sing) => {
               let n = Math.sqrt(dotProd1(sing,sing));
         return n;
@@ -775,6 +780,14 @@ const vecDif1 = ((sing1, sing2) => {
 			dif[k] = sing1[k] - sing2[k];	 }
 		return dif;
 	});
+	
+function linComb1(a1,a2,sing1,sing2) {
+			let linc = [];
+			for (k=0; k < sing1.length; k++) {
+				linc[k] = a1*sing1[k] + a2*sing2[k];
+			}
+		return linc;
+	}
 	
 const dist1 = ((sing1,sing2) => { 
               const difv = vecDif1(sing1,sing2);
@@ -817,9 +830,7 @@ const rotateInFace =((ang,qpt,midp,fvert) => { // rotate qpt in face with normal
 			let result = [];
 			const b1   = a1*ca - a2*sa;
 			const b2   = a1*sa + a2*ca;
-			for (k=0; k<3; k++) {
-				result[k] = b1*fbb[0][k] + b2*fbb[1][k] + midp[k];
-			}		
+			result     = vecSum1( linComb1(b1,b2,fbb[0],fbb[1]), midp);	
 		return result;
 	});
 	
@@ -847,9 +858,11 @@ function zProjS(pt)  {
    	return result; }
     
 function zProj(pts) { let results = [];
-                if ( !Array.isArray(pts[0]) ) { results = [zProjS(pt)]; } 
+                if ( !Array.isArray(pts[0]) ) { results = [zProjS(pts)]; } 
 				else {
-				results = zProj(pts); } 
+				for (k=0; k < pts.length; k ++)
+				    {results[k] = zProjS(pts[k]); } 
+				}
 	return results; }
 
 const projectedFaceFct = ((j,faceInd,vert) => { let ff = []; let pf = [];
@@ -863,8 +876,8 @@ const projectedFaceFct = ((j,faceInd,vert) => { let ff = []; let pf = [];
 
 // ====================== First the Platonics =========================
 // createSvgFace(j) creates a svg polygon element and return it. j is an int
-const createSvgFace = ((j,zCoord) => {
-       // const projectedFace = getFace(j,faceIndexes,vertices). map( zProj );     
+const createSvgFace = ((j,zCoord) => {       // both of the following calls work
+        //const projectedFace = getFace(j,faceIndexes,vertices). map( zProj );     
         const projectedFace = projectedFaceFct(j,faceIndexes,vertices);
         let poly = document.createElementNS("http://www.w3.org/2000/svg","polygon");
         poly.setAttribute("points", projectedFace .toString());
@@ -902,8 +915,9 @@ const createSvgFace = ((j,zCoord) => {
 // ====================== Second the Archimedean Polyhedra =========================
 
 // createSvgFace(j) creates a svg polygon element and return it. j is a int
-const createSvgTVFace = ((j,zCoord) => {
-        const vProjectedFace = projectedFaceFct(j,vFaceIndexes,vVertices);
+const createSvgTVFace = ((j,zCoord) => {       // both of the following calls work
+        const vProjectedFace = getFace(j,vFaceIndexes,vVertices). map( zProj ); 
+        //const vProjectedFace = projectedFaceFct(j,vFaceIndexes,vVertices);
         let vpoly = document.createElementNS("http://www.w3.org/2000/svg","polygon");
         vpoly.setAttribute("points", vProjectedFace .toString());
      // console.log("vFaceIndexes[",j,"]= ",vFaceIndexes[j],vFaceIndexes[j][2], vVertices[vFaceIndexes[j][2]]);
@@ -972,18 +986,20 @@ const createSvgTVFace = ((j,zCoord) => {
 
 // =========== The render routine decides what is added to the screen ============
 
-// The viewVector to FaceMidpoints decides about visibility              
+// The viewVector to FaceMidpoints decides about visibility 
+/*             
 const viewVector = (([x,y,z]) => { let vpt = [-x, -y, viewLength -z];
                 if (projType == ortho) {vpt = [0,0,10]}
      return vpt;
-}); 
-/*
+}); */
+
 const viewVector = ((point) => { let vpt = [];
 				vpt[0] = - point[0];
 				vpt[1] = - point[1];
 				vpt[2] = - point[2] + viewLength;
+				if (projType == ortho) {vpt = [0,0,10]}
      return vpt;
-}); */
+});
 
 const visible = ((j) => { let midpoint = [];
    midpt  = getFaceMidpoint(getFace(j,faceIndexes,vertices));
@@ -1131,20 +1147,22 @@ const checkTruncComputation = (() => {
 
 // ===================== response functions for input and init() ====================
 const doKeyPress = ((key) => {
-
-    if (key.code === "ArrowUp"    || (key.keyCode === 38)) { rotX(+rotationKeyIncrement)};
-    if (key.code === "ArrowDown"  || (key.keyCode === 40)) { rotX(-rotationKeyIncrement)};
-    if (key.code === "ArrowRight" || (key.keyCode === 39)) { rotY(-rotationKeyIncrement)};
-    if (key.code === "ArrowLeft"  || (key.keyCode === 37)) { rotY(+rotationKeyIncrement)};
+    let theCode = key.code;
+    let keyNum  = key.keyCode;
+    if (theCode === "ArrowUp"    || (keyNum === 38)) { rotX(+rotationKeyIncrement)};
+    if (theCode === "ArrowDown"  || (keyNum === 40)) { rotX(-rotationKeyIncrement)};
+    if (theCode === "ArrowRight" || (keyNum === 39)) { rotY(-rotationKeyIncrement)};
+    if (theCode === "ArrowLeft"  || (keyNum === 37)) { rotY(+rotationKeyIncrement)};
     key.code    = "";
     key.keyCode = 32;
 });
 
 const gettruncationMode = ((truncateName) => {
-	if (truncateMenu.value == "regular") {truncationMode = regular};
-	if (truncateMenu.value == "vtrunc")  {truncationMode = vtrunc; getVFaceIndexes();  truncParam = 32;}
-	if (truncateMenu.value == "etrunc")  {truncationMode = etrunc; getEFaceIndexes();  truncParam = 32;}
-	if (truncateMenu.value == "strunc")  {truncationMode = strunc; getSFaceIndexes();  truncParam = 48;}
+	let theMenuVal = truncateMenu.value;
+	if (theMenuVal == "regular") {truncationMode = regular};
+	if (theMenuVal == "vtrunc")  {truncationMode = vtrunc; getVFaceIndexes();  truncParam = 32;}
+	if (theMenuVal == "etrunc")  {truncationMode = etrunc; getEFaceIndexes();  truncParam = 32;}
+	if (theMenuVal == "strunc")  {truncationMode = strunc; getSFaceIndexes();  truncParam = 48;}
 	truncationFlag = (truncationMode == vtrunc)||(truncationMode == etrunc)||(truncationMode == strunc);
 	 if (truncationMode == etrunc) {
     	if (polyhedronMenu.value == "tetrahedron")  {truncParam = 36}
@@ -1197,7 +1215,9 @@ const OrthoPersp = (() => {
 	if (inputOrtho.checked) {projType = ortho; inputPersp.checked = false;}
 	if (inputPersp.checked) {projType = persp; inputOrtho.checked = false;}
 	render();	
-});	
+});
+
+	
 	inputBlack.checked = true;
     inputPatchStyle.checked = true;
     inputPersp.checked = true; 
