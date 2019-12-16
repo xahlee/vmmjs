@@ -284,22 +284,22 @@ const getEdgeIndexes= (() => {
 	const fl = faceIndexes[0].length;  // all faces are considered equal in truncation
 	// initialize:
 	edge2num = []; vertex2edge = [];
-	for (i = 0; i < vl; i++)  {
+	for (let i = 0; i < vl; i++)  {
 	    edge2num[i]   = [] ;
 	    vert2edge[i]  = -1;
 	    }
-  	for (i = 0; i < vl; i++)  {
-	    for(j = 0; j < vl; j++)  { 
+  	for (let i = 0; i < vl; i++)  {
+	    for(let j = 0; j < vl; j++)  { 
 	     edge2num[i][j]   = -1; }}
 	// edgeIndexes[k] ist the k.th edge = [vertexStart, vertexEnd, itsFace, indexInFace]
 	// edge2num gives for each edge its number and for non-edge pairs gives -1
 	// vert2edge[j]  gives for the j.th vertex the number of an edge starting at it
 	let k = 0;
-	for (j = 0; j < faceIndexes.length; j++) 
+	for (let j = 0; j < faceIndexes.length; j++) 
 	{
 		const f = faceIndexes[j];  
 		// f is the set of indices of vertices of the j.th face in cyclic order
-	    for (i = 0; i < fl; i++) {
+	    for (let i = 0; i < fl; i++) {
 	        // contains: 1st edgeVertex, 2nd edgeVertex, itsFace, indexInFace
 	    	edgeIndexes[k] = [f[i],f[(i+1)%fl],j,i];
 	    	edge2num [f[i]] [f[(i+1)%fl]] = k;  // 2-index array syntax: array[i] [j]
@@ -319,11 +319,11 @@ const getInverseEdge= ((k) => { let inEdge;
 // getVertexStars fills the array vertexStar; it must be called after getEdgeIndexes
 const getVertexStars= (() => { vertexStar = [];
       // vertexStar is a global variable, initialized as double array:
-      for (i=0; i < vertices.length; i++) {vertexStar[i] = []; }
+      for (let i=0; i < vertices.length; i++) {vertexStar[i] = []; }
 	
 	const fl = faceIndexes[0].length;       // = number of vertices of the face
 	edgesFromVertex = numEdges/numVertices; // Only used for platonics where all vertices are the same
-    for (i = 0; i < numVertices; i++)  {
+    for (let i = 0; i < numVertices; i++)  {
 	   let ke = vert2edge[i];               // number of the last stored edge leaving i.th vertex
 	   let ecount = 0;
 	   while (ecount < edgesFromVertex) {
@@ -346,10 +346,10 @@ const checkTruncDetailsF = (() => {          // ======== helps debugging the fol
 const getVFaceIndexes= (() =>
            {	
 	 		vFaceIndexes = []; // 
-			for (j = 0; j < numVertices + numFaces ; j++) {
+			for (let j = 0; j < numVertices + numFaces ; j++) {
 			    vFaceIndexes[j] = [];          }  // initialize as double array
 											  
-			for (j = 0; j < numVertices; j++) 
+			for (let j = 0; j < numVertices; j++) 
 				{
 			    for (ec = 0; ec < edgesFromVertex; ec++) 
 			    	{
@@ -366,11 +366,11 @@ const getVFaceIndexes= (() =>
 				
 			// the nearer vVertex on an edge has the same number as this edge
 			const faceLength = faceIndexes[0].length;
-			for (j = 0; j < numFaces; j++)
+			for (let j = 0; j < numFaces; j++)
 			 	{    let currentEdge = [];        //  console.log(j,"th face=",faceIndexes[j] );
 			 	 	 let currentEdgeNum = -1;
 			 	 	 let inverseEdgeNum = -1;
-			 	for (ec = 0; ec < faceLength; ec++) 
+			 	for (let ec = 0; ec < faceLength; ec++) 
 			 		{  currentEdge = [ faceIndexes[j][ec], faceIndexes[j][(ec+1)%faceLength] ];
 			 		   currentEdgeNum = edge2num[currentEdge[0]] [currentEdge[1]];
 			 		   inverseEdgeNum = edge2num[currentEdge[1]] [currentEdge[0]];
@@ -395,19 +395,19 @@ const getEFaceIndexes= (() =>   // stored in vFaceIndexes
                 const numFaceVert = faceIndexes[0].length;
                 currentEdge  = []; 
                 
-			for (j = 0; j < numFaces + numVertices + numEdges/2; j++) { //
+			for (let j = 0; j < numFaces + numVertices + numEdges/2; j++) { //
 			    vFaceIndexes[j] = [];          }  // initialize as double array
 											  
-			for (j = 0; j < numFaces; j++)  // Faces inside old faces
+			for (let j = 0; j < numFaces; j++)  // Faces inside old faces
 				{
 			    for (ec = 0; ec < numFaceVert; ec++)
 						vFaceIndexes[j][ec] = j*numFaceVert + ec; // Faces inside the old Faces
 			    }
 			fChgColor[1] =  numFaces;
 			   
-			for (j = 0; j < numVertices; j++) // Faces underneath vertices
+			for (let j = 0; j < numVertices; j++) // Faces underneath vertices
 				{
-			    for (ec = 0; ec < edgesFromVertex; ec++)
+			    for (let ec = 0; ec < edgesFromVertex; ec++)
 			    	{
 			    		currentEdge = vertexStar[j][ec];  // ke = number of ec.th edge from vertex j
 			    		//console.log("vertexStar[j][ec] ",vertexStar[j][ec],currentEdge,currentEdge[2],currentEdge[3]);
@@ -418,7 +418,7 @@ const getEFaceIndexes= (() =>   // stored in vFaceIndexes
 			 fChgColor[2] =  numFaces + numVertices;
 			    
 				ke = 0;
-			   	for (j=0; j < numEdges; j++) 
+			   	for (let j=0; j < numEdges; j++) 
 				{
 					currentEdge = edgeIndexes[j];
 					//currentEdge[2] is the faceNum of this edge 
@@ -444,19 +444,19 @@ const getSFaceIndexes= (() =>   // stored in vFaceIndexes. Almost the same as ge
                 const numFaceVert = faceIndexes[0].length;
                 currentEdge  = []; 
                 
-			for (j = 0; j < numFaces + numVertices + numEdges; j++) { //
+			for (let j = 0; j < numFaces + numVertices + numEdges; j++) { //
 			    vFaceIndexes[j] = [];          }  // initialize as double array
 											  
-			for (j = 0; j < numFaces; j++)  // Faces inside old faces
+			for (let j = 0; j < numFaces; j++)  // Faces inside old faces
 				{
-			    for (ec = 0; ec < numFaceVert; ec++)
+			    for (let ec = 0; ec < numFaceVert; ec++)
 						vFaceIndexes[j][ec] = j*numFaceVert + ec; // Faces inside the old Faces
 			    }
 			fChgColor[1] =  numFaces;
 			    
-			for (j = 0; j < numVertices; j++) // Faces underneath vertices
+			for (let j = 0; j < numVertices; j++) // Faces underneath vertices
 				{
-			    for (ec = 0; ec < edgesFromVertex; ec++)
+			    for (let ec = 0; ec < edgesFromVertex; ec++)
 			    	{
 			    		currentEdge = vertexStar[j][ec];  // ke = number of ec.th edge from vertex j
 			    		//console.log("vertexStar[j][ec] ",vertexStar[j][ec],currentEdge,currentEdge[2],currentEdge[3]);
@@ -467,7 +467,7 @@ const getSFaceIndexes= (() =>   // stored in vFaceIndexes. Almost the same as ge
 			 fChgColor[2] =  numFaces + numVertices;
 			    
 				ke = 0;
-			   	for (j=0; j < numEdges; j++) 
+			   	for (let j=0; j < numEdges; j++) 
 				{
 					currentEdge = edgeIndexes[j];
 					//currentEdge[2] is the faceNum of this edge 
@@ -508,14 +508,14 @@ const getVTrunc = (() => {
 			if ( !vDone )  // Do not recompute for rotations in render()
 			{
 			    vVertices = [];
-        	    for (j = 0; j < numEdges; j++) {
+        	    for (let j = 0; j < numEdges; j++) {
                 	vVertices[j] = [];             
                 }  // initialize as 2D-array
                 let vec0 = [];
                 let vec1 = [];
                 let vc   = 0;
                 
-           for (l = 0; l < numEdges; l++) {          // DO NOT USE INDEX "k" HERE nor in getETrunc
+           for (let k = 0; k < numEdges; k++) {
             	vec0 = vertices[edgeIndexes[vc][0]];
             	vec1 = vertices[edgeIndexes[vc][1]];
             	//console.log("vc= ",vc," EdgeIndexes = ",edgeIndexes[vc][0],edgeIndexes[vc][1],"  vec0, vec1 ", vec0,vec1);
@@ -536,20 +536,20 @@ const getETrunc = (() => {
 			{
 				vVertices = [];
 				const numEVertices = numFaces * faceIndexes[0].length;
-				for (k = 0; k < numEVertices; k++) {
+				for (let k = 0; k < numEVertices; k++) {
                 vVertices[k] =  [];                }  // initialize as 2D-array
                 let jMidpoint = [];
                 let curVertex = [];
                 let vc        = 0;            // counting index  
                 
-                for (j=0; j < numFaces; j++)
+                for (let j=0; j < numFaces; j++)
                 {	
                 	jMidpoint = getFaceMidpoint(getFace(j,faceIndexes,vertices));
                 	for (cf = 0; cf < faceIndexes[0].length; cf++)
                     {
                     	curVertex = vertices[faceIndexes[j][cf]]; // vertexNr cf in faceNr j
                     	vVertices[vc] = linComb1((1-2*vParam), 2*vParam, curVertex, jMidpoint);
-                    /*	for (k = 0; k < 3; k++)
+                    /*	for (let k = 0; k < 3; k++)
                     	{
                     	vVertices[vc][k] = (1-2*vParam) * curVertex[k]  + 2*vParam * jMidpoint[k];
                     	} */
@@ -567,7 +567,7 @@ const getSTrunc = (() => {  // the e-vertices have to be rotated in the original
 			{
 				vVertices = [];
 				const numEVertices = numFaces * faceIndexes[0].length;
-				for (k = 0; k < numEVertices; k++) {
+				for (let k = 0; k < numEVertices; k++) {
                 vVertices[k] =  [];        }  // initialize as 2D-array
                 let jMidpoint = [];
                 let firstVert = [];
@@ -740,7 +740,7 @@ const rotZ = ((deg) => {
 // ===== the "1" at the end of the following names says: do not use for arrays ======            
 const dotProd1 = ((sing1, sing2) => {  
 							let dp = 0;
-							for (k=0; k < sing1.length; k++)
+							for (let k=0; k < 3; k++)
 							{	dp = dp + sing1[k] * sing2[k];
 							}
 					return dp;
@@ -748,7 +748,7 @@ const dotProd1 = ((sing1, sing2) => {
 	
 const dotProda = ((sina1, sina2) => {  
 							let dp = [];
-							for (j=0; j < sina2.length; j++)
+							for (let j=0; j < sina2.length; j++)
 							{	dp[j] = dotProd1(sina1[j],sina2[j]);
 							}
 					return dp;
@@ -762,28 +762,28 @@ const norm1 = ((sing) => {
 const normalize = ((sing) => {   // use only for non-zero vectors
                   let n = norm1(sing);
                   let unit = [];
-                  for (k = 0; k < 3; k++) {
+                  for (let k = 0; k < 3; k++) {
                   	unit[k] = sing[k]/n;  }
 			return unit;
 	});
 	
 const vecSum1 = ((sing1, sing2) => {
 			let sum = [];
-            for (k=0; k < sing1.length; k++) {
+            for (let k=0; k < sing1.length; k++) {
 			sum[k] = sing1[k] + sing2[k];	 }
 		return sum;
 	});
 	
 const vecDif1 = ((sing1, sing2) => {
 			let dif = [];
-            for (k=0; k < sing1.length; k++) {
+            for (let k=0; k < sing1.length; k++) {
 			dif[k] = sing1[k] - sing2[k];	 }
 		return dif;
 	});
 	
 function linComb1(a1,a2,sing1,sing2) {
 			let linc = [];
-			for (k=0; k < sing1.length; k++) {
+			for (let k=0; k < sing1.length; k++) {
 				linc[k] = a1*sing1[k] + a2*sing2[k];
 			}
 		return linc;
@@ -796,9 +796,9 @@ const dist1 = ((sing1,sing2) => {
 	});
 
 function getFaceMidpoint(pts) { let mdp = [];
-                             for (k = 0; k < pts[0].length; k++)
+                             for (let k = 0; k < pts[0].length; k++)
                             {    mdp[k]=0;
-                                 for (i=0; i < pts.length; i++)
+                                 for (let i=0; i < pts.length; i++)
                                 {	mdp[k] = mdp[k] + pts[i][k];
                             	}   mdp[k] = mdp[k]/pts.length;
                             }
@@ -860,7 +860,7 @@ function zProjS(pt)  {
 function zProj(pts) { let results = [];
                 if ( !Array.isArray(pts[0]) ) { results = [zProjS(pts)]; } 
 				else {
-				for (k=0; k < pts.length; k ++)
+				for (let k=0; k < pts.length; k ++)
 				    {results[k] = zProjS(pts[k]); } 
 				}
 	return results; }
@@ -868,7 +868,7 @@ function zProj(pts) { let results = [];
 const projectedFaceFct = ((j,faceInd,vert) => { let ff = []; let pf = [];
                     ff = getFace(j,faceInd,vert); 
                        // console.log("projectedFace ",j,faceInd[j],vert[j]);
-                    for (i=0; i < ff.length; i++) {
+                    for (let i=0; i < ff.length; i++) {
                          pf[i] = zProjS(ff[i]);
                      } 
                 return pf;
@@ -987,19 +987,18 @@ const createSvgTVFace = ((j,zCoord) => {       // both of the following calls wo
 // =========== The render routine decides what is added to the screen ============
 
 // The viewVector to FaceMidpoints decides about visibility 
-/*             
+/*
 const viewVector = (([x,y,z]) => { let vpt = [-x, -y, viewLength -z];
                 if (projType == ortho) {vpt = [0,0,10]}
      return vpt;
-}); */
-
-const viewVector = ((point) => { let vpt = [];
-				vpt[0] = - point[0];
-				vpt[1] = - point[1];
-				vpt[2] = - point[2] + viewLength;
-				if (projType == ortho) {vpt = [0,0,10]}
+});  // This and the next version both work
+*/
+function viewVector(point) { let vpt = [0,0,10];
+				if  (projType == persp) {
+					vpt = [- point[0], - point[1], - point[2] + viewLength];
+				}  // eventListener returns viewLength as string, needs conversion
      return vpt;
-});
+}
 
 const visible = ((j) => { let midpoint = [];
    midpt  = getFaceMidpoint(getFace(j,faceIndexes,vertices));
@@ -1015,7 +1014,7 @@ const TVvisible = ((j) => {
 	let vNormal = [];
    	vMidpt  = getFaceMidpoint(getFace(j,vFaceIndexes,vVertices));
    	if ((truncationMode == vtrunc)||(truncationMode == etrunc)) 
-   	{
+   	{            // vMidpt is normal of the face
    		result = dotProd1(vMidpt, viewVector(vMidpt));
    	} else
    	{
@@ -1042,12 +1041,12 @@ const render = () => {
     if (renderstyle == patch) 
     {
 	   if ( !truncationFlag )          {
-	   for (j = 0; j < faceIndexes.length; j++) {
+	   for (let j = 0; j < faceIndexes.length; j++) {
        		zCoord = visible(j);
        		if (zCoord >= 0) {svgEl.appendChild(createSvgFace(j,zCoord));} 
        }}
 	if ( truncationFlag)                             {
-	   		for (j = 0; j < vFaceIndexes.length; j++) {
+	   		for (let j = 0; j < vFaceIndexes.length; j++) {
        			zCoord = TVvisible(j);
        			if (zCoord >= 0) 
        			{svgEl.appendChild(createSvgTVFace(j,zCoord));}
@@ -1058,13 +1057,13 @@ const render = () => {
 	 { 
 	   if ( !truncationFlag ) {
 	   drawLine = overl;
-	   for (j = 0; j < faceIndexes.length; j++) {
+	   for (let j = 0; j < faceIndexes.length; j++) {
               zCoord = visible(j);
               if (zCoord < 0)
 	            svgEl.appendChild(createSvgFace(j,zCoord)); 
 	    }}
 	    if ( truncationFlag )                     {
-	    for (j = 0; j < vFaceIndexes.length; j++) {
+	    for (let j = 0; j < vFaceIndexes.length; j++) {
 	          {
 	            zCoord = TVvisible(j);
 	            if (zCoord < 0)
@@ -1074,7 +1073,7 @@ const render = () => {
 	    
 	    if ( truncationMode == regular ) {
 	    drawLine = underl;  // Top parts here
-	    for (j = 0; j < faceIndexes.length; j++) {
+	    for (let j = 0; j < faceIndexes.length; j++) {
 	          {
 	            zCoord = visible(j);
 	            if (zCoord >= 0)
@@ -1082,7 +1081,7 @@ const render = () => {
 	          }
 	    }
 	   drawLine = overl;
-	    for (j = 0; j < faceIndexes.length; j++) {
+	    for (let j = 0; j < faceIndexes.length; j++) {
 	          {
 	            zCoord = visible(j);
 	            if (zCoord >= 0)
@@ -1092,7 +1091,7 @@ const render = () => {
 	    
 	    if ( truncationFlag  )                    {
 	    drawLine = underl;
-	    for (j = 0; j < vFaceIndexes.length; j++) {
+	    for (let j = 0; j < vFaceIndexes.length; j++) {
 	          {
 	            zCoord = TVvisible(j);
 	            if (zCoord >= 0)
@@ -1100,7 +1099,7 @@ const render = () => {
 	          }
 	    	}
 	    drawLine = overl;
-	    for (j = 0; j < vFaceIndexes.length; j++) {
+	    for (let j = 0; j < vFaceIndexes.length; j++) {
 	          {
 	            zCoord = TVvisible(j);
 	            if (zCoord >= 0)
@@ -1126,8 +1125,8 @@ const checkComputedData = (() => {
 	console.log(edgeIndexes[ki][0],edgeIndexes[ki][1]);
 
 	// check for each vertex its edges:
- 	for (i=0; i < vertices.length; i++) {
-    	for (j=0; j < edgesFromVertex; j++) {
+ 	for (let i=0; i < vertices.length; i++) {
+    	for (let j=0; j < edgesFromVertex; j++) {
 			console.log(vertexStar[i][j]);
 	}}
 
@@ -1138,8 +1137,8 @@ const checkComputedData = (() => {
 const checkTruncComputation = (() => {
     if (truncationFlag) {
 	      console.log(vVertices.length)
-		 	for (i=0; i < vertices.length; i++) {
-		 	   for (j=0; j < edgesFromVertex; j++) {
+		 	for (let i=0; i < vertices.length; i++) {
+		 	   for (let j=0; j < edgesFromVertex; j++) {
 				console.log(vFaceIndexes[i][j]);
 		}}
 	}
@@ -1176,7 +1175,7 @@ const gettruncationMode = ((truncateName) => {
 
 inputViewDist.value = viewLength;
 function ViewDist() {
-viewLength = inputViewDist.value;
+viewLength = 1.0*inputViewDist.value; // 1* converts string to number
 viewPoint  = [0,0,viewLength];
 vDone = false;  // recomputation needed
 render();
@@ -1258,7 +1257,7 @@ init();
 	inputPatchStyle.addEventListener("change", PatchWire);
 	inputWireFrame.addEventListener("change", PatchWire);
 	
-    inputViewDist . addEventListener("change", ViewDist);
+    inputViewDist . addEventListener("change", ViewDist);  // returns number as string
     inputTruncParam.addEventListener("change", TruncParam);
 }
 
