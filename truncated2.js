@@ -14,8 +14,8 @@ let inputOrtho       = document.getElementById("ortho");
 let inputPersp       = document.getElementById("persp");   
 
 
-const viewPortWidth = 600;
-const viewPortHeight = 600;
+const viewPortWidth = 500;  // These numbers also appear in the html file ??
+const viewPortHeight = 500;
 const viewBoxWidth = 40;
 let mybackground = "black";
 let myforeground = "cyan";
@@ -24,7 +24,7 @@ let myforeground = "cyan";
 const svgEl = document.createElementNS("http://www.w3.org/2000/svg","svg");
 svgEl.setAttribute("width",viewPortWidth);
 svgEl.setAttribute("height",viewPortHeight);
-svgEl.setAttribute("viewBox",`-21 -20 ${viewBoxWidth} ${viewBoxWidth}`);
+svgEl.setAttribute("viewBox",`-20 -20 ${viewBoxWidth} ${viewBoxWidth}`);
 // insert svg element to page
 svgArea.appendChild(svgEl);
 
@@ -37,22 +37,21 @@ const rotationKeyIncrement = 5;
 // For basic drawing
 const patch = "patch";
 const wire  = "wire";
-let renderstyle;
-renderstyle = patch;
+let renderstyle = patch;
 let renderVal  = "patchstyle";  // needed for "refresh"
 const underl = 0;
 const overl  = 1;
 let drawLine = overl;
 
 // For perspective drawing
-let viewLength = 80;    // is a parameter, not a constant
+let viewLength = 80;    // the eventListener returns strings!!
 let viewPoint  = [0,0,viewLength];
 const ortho    = "ortho"; // orthogonal
 const persp    = "persp"; // perspective
 let projType   = persp;
 
 // For changing the truncation parameter
-let truncParam = 32; // max = 48
+let truncParam = "32"; // max = 48
 let vParam     = truncParam/96; // see function TruncParam()
 
 // For Truncation
@@ -249,16 +248,16 @@ const initVertices = ((polyhedronName) => {
     fChgColor[0] = numFaces;
     vDone = false;
     // use default values for the truncation that give Archimedean solids:
-    if (truncationMode == vtrunc) {getVFaceIndexes(); truncParam = 32;}
+    if (truncationMode == vtrunc) {getVFaceIndexes(); truncParam = "32";}
     if (truncationMode == etrunc)
-    {   getEFaceIndexes(); truncParam = 32;
-    	if (polyhedronMenu.value == "tetrahedron")  {truncParam = 36}
-    	if (polyhedronMenu.value == "cube")         {truncParam = 28}
-    	if (polyhedronMenu.value == "dodecahedron") {truncParam = 24}
+    {   getEFaceIndexes(); truncParam = "32";
+    	if (polyhedronMenu.value == "tetrahedron")  {truncParam = "36"}
+    	if (polyhedronMenu.value == "cube")         {truncParam = "28"}
+    	if (polyhedronMenu.value == "dodecahedron") {truncParam = "24"}
     }	
-    if (truncationMode == strunc) {getSFaceIndexes(); truncParam = 48;}
+    if (truncationMode == strunc) {getSFaceIndexes(); truncParam = "48";}
     inputTruncParam.value = truncParam;
-    vParam = truncParam/96;
+    vParam = truncParam/96;  // automatic conversion to number
 // =========== These index computations are done only once for each polyhedron =====
 // ======= vertices and vVertices are rotated; vVertices depend on vParam ==========
 });
@@ -311,8 +310,8 @@ const getEdgeIndexes= (() => {
 });
 
 // ====== getInverseEdge( number of edge[j1,j2]) = number of inverseEdge[j2,j1]  =======
-const getInverseEdge= ((k) => { let inEdge;
-          inEdge = edgeIndexes[k];         // an array of four numbers
+const getInverseEdge= ((k) => {
+          let inEdge = edgeIndexes[k];     // an array of four numbers
    return edge2num[inEdge[1]] [inEdge[0]]; // number of inverse edge; entries not filled here are -1
 });
 
@@ -339,7 +338,7 @@ const getVertexStars= (() => { vertexStar = [];
 /*
 const checkTruncDetailsF = (() => {          // ======== helps debugging the following routine ==========
 				console.log("The separate vFaceIndexes follow:");
-				for (i = 0; i < numVertices; i++) {
+				for (let i = 0; i < numVertices; i++) {
 				console.log(i,".th vFaceIndex ",vFaceIndexes[i][0],vFaceIndexes[i][1],vFaceIndexes[i][2]);}
 });
 */
@@ -351,7 +350,7 @@ const getVFaceIndexes= (() =>
 											  
 			for (let j = 0; j < numVertices; j++) 
 				{
-			    for (ec = 0; ec < edgesFromVertex; ec++) 
+			    for (let ec = 0; ec < edgesFromVertex; ec++) 
 			    	{
 			        // vFaceIndexes[j][ec] is the ivVertex-Index of the ks.th vertex around the j.th vertex
 			        // vertexStar[j][ec] is the 4-array of the ec.th edge leaving vertex j
@@ -400,7 +399,7 @@ const getEFaceIndexes= (() =>   // stored in vFaceIndexes
 											  
 			for (let j = 0; j < numFaces; j++)  // Faces inside old faces
 				{
-			    for (ec = 0; ec < numFaceVert; ec++)
+			    for (let ec = 0; ec < numFaceVert; ec++)
 						vFaceIndexes[j][ec] = j*numFaceVert + ec; // Faces inside the old Faces
 			    }
 			fChgColor[1] =  numFaces;
@@ -499,7 +498,7 @@ const getFace = ((j,fInd,vert) => fInd[j] . map ((x) => vert[x]) );  // will be 
 /*
 const checkTruncDetailsV = (() => {         // ======== helps debugging the following routine ==========
 				console.log("The vertices ",vertices); console.log("The vVertices ", vVertices);
-			    for (i = 0; i < numEdges; i++) {
+			    for (let i = 0; i < numEdges; i++) {
 			    console.log(i,".th vVertex ",vVertices[i]);}
 });
  */
@@ -513,17 +512,15 @@ const getVTrunc = (() => {
                 }  // initialize as 2D-array
                 let vec0 = [];
                 let vec1 = [];
-                let vc   = 0;
                 
            for (let k = 0; k < numEdges; k++) {
-            	vec0 = vertices[edgeIndexes[vc][0]];
-            	vec1 = vertices[edgeIndexes[vc][1]];
-            	//console.log("vc= ",vc," EdgeIndexes = ",edgeIndexes[vc][0],edgeIndexes[vc][1],"  vec0, vec1 ", vec0,vec1);
+            	vec0 = vertices[edgeIndexes[k][0]];
+            	vec1 = vertices[edgeIndexes[k][1]];
+            	//console.log("k= ",k," EdgeIndexes = ",edgeIndexes[k][0],edgeIndexes[k][1],"  vec0, vec1 ", vec0,vec1);
             	//This check is ok
-            	vVertices[vc] = linComb1(1 - vParam, vParam, vec0, vec1);
+            	vVertices[k] = linComb1(1 - vParam, vParam, vec0, vec1);
             	// on each oriented edge we have one vertex of the vertex truncation
-            	// and vVertex[vc] lies on the vc.th edge
-            vc++;
+            	// and vVertex[k] lies on the k.th edge
 			}
 	// checkTruncDetailsV();		//looks good	
  			vDone = true;
@@ -545,14 +542,10 @@ const getETrunc = (() => {
                 for (let j=0; j < numFaces; j++)
                 {	
                 	jMidpoint = getFaceMidpoint(getFace(j,faceIndexes,vertices));
-                	for (cf = 0; cf < faceIndexes[0].length; cf++)
+                	for (let cf = 0; cf < faceIndexes[0].length; cf++)
                     {
                     	curVertex = vertices[faceIndexes[j][cf]]; // vertexNr cf in faceNr j
                     	vVertices[vc] = linComb1((1-2*vParam), 2*vParam, curVertex, jMidpoint);
-                    /*	for (let k = 0; k < 3; k++)
-                    	{
-                    	vVertices[vc][k] = (1-2*vParam) * curVertex[k]  + 2*vParam * jMidpoint[k];
-                    	} */
                     	vc++;
                     }
                 }
@@ -573,7 +566,7 @@ const getSTrunc = (() => {  // the e-vertices have to be rotated in the original
                 let firstVert = [];
                 let curVertex = [];
                 let triang1   = [];
-                auxV          = [];
+                let auxV      = [];
                 let vc        = 0; 	           // counting index
                     // Needed for the isocele triangles on the snub polyhedra
                 	let ang       = 0;
@@ -604,19 +597,19 @@ const getSTrunc = (() => {  // the e-vertices have to be rotated in the original
                 jMidpoint = [];
                 firstVert = [];
                 curVertex = [];
-                auxV          = [];
-                let vc        = 0;
+                auxV      = [];
+                vc        = 0;
                 vVertices = [];
-				for (k = 0; k < numEVertices; k++) {
+				for (let k = 0; k < numEVertices; k++) {
                 vVertices[k] =  [];   }
                  
-                for (j=0; j < numFaces; j++)
+                for (let j=0; j < numFaces; j++)
                 {	
                 	jMidpoint = getFaceMidpoint(getFace(j,faceIndexes,vertices));
                 	firstVert = vertices[faceIndexes[j][0]];
                 	faceB = faceBasis(jMidpoint, firstVert);
                 	// console.log(["midpoint,firstVertex: ",jMidpoint,firstVert]); console.log("faceBasis= ", faceB);
-                	for (cf = 0; cf < faceIndexes[0].length; cf++)
+                	for (let cf = 0; cf < faceIndexes[0].length; cf++)
                     {
                     	curVertex = vertices[faceIndexes[j][cf]]; // vertexNr cf in faceNr j
                     	auxV =  linComb1((1 - vParam * polyCor()), vParam * polyCor(), curVertex, jMidpoint);
@@ -626,7 +619,7 @@ const getSTrunc = (() => {  // the e-vertices have to be rotated in the original
                 }// console.log("getSTrunc, vVertices: ",vVertices);
 
 // ==================== Snub truncation finished, but dependent also on the rotation parameter ang ===================                
-// ==================== adjust rotation angle ang with the help of the first triangle dependent on vParam ============
+// ==================== adjust rotation angle ang with the help of the first triangle, dependent on vParam ===========
 
                 dt1 = dist1(vVertices[triang1[0]],vVertices[triang1[1]]);
                 dt2 = dist1(vVertices[triang1[0]],vVertices[triang1[2]]);  	
@@ -745,12 +738,15 @@ const dotProd1 = ((sing1, sing2) => {
 							}
 					return dp;
 	});
-	
+                // sina1 may be a single vector, sina2 is an array	
 const dotProda = ((sina1, sina2) => {  
 							let dp = [];
 							for (let j=0; j < sina2.length; j++)
-							{	dp[j] = dotProd1(sina1[j],sina2[j]);
-							}
+							{	if (!(Array.isArray(sina1[0])))
+							    {	dp[j] = dotProd1(sina1,sina2[j]);    }
+								else
+								{	dp[j] = dotProd1(sina1[j],sina2[j]); }
+							 }
 					return dp;
 	});
 	
@@ -837,8 +833,7 @@ const rotateInFace =((ang,qpt,midp,fvert) => { // rotate qpt in face with normal
 const normalOf3Pts = ((pt1,pt2,pt3) => {
 			const df1  = vecDif1(pt2,pt1);
 			const df2  = vecDif1(pt3,pt2);
-			let result = [];
-			result     = crossProd1(df1,df2);
+			let result = crossProd1(df1,df2);
 		return result;
 	});
 	
@@ -849,8 +844,7 @@ const normalOf3Pts = ((pt1,pt2,pt3) => {
 // const zProj  = (([x,y,z]) => {zProjL([x,y,z],viewLength) } ); does not work
 
 function zProjS(pt)  { 
-				let result = [];
-                result = [pt[0], pt[1]];
+                let result = [pt[0], pt[1]];
                 if (projType == persp) {
         			let ratio = viewLength/(viewLength - pt[2]);
    					result    = [ratio*pt[0], ratio*pt[1]];
@@ -860,13 +854,14 @@ function zProjS(pt)  {
 function zProj(pts) { let results = [];
                 if ( !Array.isArray(pts[0]) ) { results = [zProjS(pts)]; } 
 				else {
-				for (let k=0; k < pts.length; k ++)
-				    {results[k] = zProjS(pts[k]); } 
+				for (let j=0; j < pts.length; j++)
+				    {results[j] = zProjS(pts[j]); } 
 				}
 	return results; }
 
-const projectedFaceFct = ((j,faceInd,vert) => { let ff = []; let pf = [];
-                    ff = getFace(j,faceInd,vert); 
+const projectedFaceFct = ((j,faceInd,vert) => { 
+					let pf = [];
+                    let ff = getFace(j,faceInd,vert); 
                        // console.log("projectedFace ",j,faceInd[j],vert[j]);
                     for (let i=0; i < ff.length; i++) {
                          pf[i] = zProjS(ff[i]);
@@ -1000,8 +995,8 @@ function viewVector(point) { let vpt = [0,0,10];
      return vpt;
 }
 
-const visible = ((j) => { let midpoint = [];
-   midpt  = getFaceMidpoint(getFace(j,faceIndexes,vertices));
+const visible = ((j) => {
+   let midpt  = getFaceMidpoint(getFace(j,faceIndexes,vertices));
    let result = midpt[2];
    if (projType == persp) {
    		result = dotProd1(midpt, viewVector(midpt));
@@ -1010,9 +1005,8 @@ const visible = ((j) => { let midpoint = [];
 });
   
 const TVvisible = ((j) => { 
-	let vMidpt  = [];
-	let vNormal = [];
-   	vMidpt  = getFaceMidpoint(getFace(j,vFaceIndexes,vVertices));
+	let result = 0;
+   	let vMidpt  = getFaceMidpoint(getFace(j,vFaceIndexes,vVertices));
    	if ((truncationMode == vtrunc)||(truncationMode == etrunc)) 
    	{            // vMidpt is normal of the face
    		result = dotProd1(vMidpt, viewVector(vMidpt));
@@ -1022,7 +1016,7 @@ const TVvisible = ((j) => {
    	let v1  = getFace(j,vFaceIndexes,vVertices)[1];
    	let v2  = getFace(j,vFaceIndexes,vVertices)[2];
    
-   	vNormal = normalOf3Pts(v0,v1,v2); // all faces are correctly oriented
+   	let vNormal = normalOf3Pts(v0,v1,v2); // all faces are correctly oriented
    	result = dotProd1(vNormal, viewVector(vMidpt));
    	}
    return result; 
@@ -1159,17 +1153,17 @@ const doKeyPress = ((key) => {
 const gettruncationMode = ((truncateName) => {
 	let theMenuVal = truncateMenu.value;
 	if (theMenuVal == "regular") {truncationMode = regular};
-	if (theMenuVal == "vtrunc")  {truncationMode = vtrunc; getVFaceIndexes();  truncParam = 32;}
-	if (theMenuVal == "etrunc")  {truncationMode = etrunc; getEFaceIndexes();  truncParam = 32;}
-	if (theMenuVal == "strunc")  {truncationMode = strunc; getSFaceIndexes();  truncParam = 48;}
+	if (theMenuVal == "vtrunc")  {truncationMode = vtrunc; getVFaceIndexes();  truncParam = "32";}
+	if (theMenuVal == "etrunc")  {truncationMode = etrunc; getEFaceIndexes();  truncParam = "32";}
+	if (theMenuVal == "strunc")  {truncationMode = strunc; getSFaceIndexes();  truncParam = "48";}
 	truncationFlag = (truncationMode == vtrunc)||(truncationMode == etrunc)||(truncationMode == strunc);
 	 if (truncationMode == etrunc) {
-    	if (polyhedronMenu.value == "tetrahedron")  {truncParam = 36}
-    	if (polyhedronMenu.value == "cube")         {truncParam = 28}
-    	if (polyhedronMenu.value == "dodecahedron") {truncParam = 24}
+    	if (polyhedronMenu.value == "tetrahedron")  {truncParam = "36"}
+    	if (polyhedronMenu.value == "cube")         {truncParam = "28"}
+    	if (polyhedronMenu.value == "dodecahedron") {truncParam = "24"}
     } 
     inputTruncParam.value = truncParam;
-    vParam = truncParam/96; 
+    vParam = truncParam/96;  // Automatic conversion
 	vDone = false;
 });
 
@@ -1181,10 +1175,10 @@ vDone = false;  // recomputation needed
 render();
 }
 
-//inputTruncParam.value = truncParam;
+inputTruncParam.value = truncParam;
 function TruncParam() {
 truncParam = inputTruncParam.value;
-vParam     = truncParam/96;
+vParam     = truncParam/96;  // Automatic conversion
 vDone = false;
 render();
 }
