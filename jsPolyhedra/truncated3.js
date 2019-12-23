@@ -921,9 +921,9 @@ const createSvgFace = ((j,zCoord) => {       // both of the following calls work
         if (drawLine == overl)
           {
         	if (mybackground == "black"){
-        		poly.setAttribute("style", `fill:none;stroke:red;stroke-width:${(viewBoxWidth/96).toString()}`);}
+        		poly.setAttribute("style", `fill:none;stroke:red;stroke-linecap:round;stroke-linejoin:round;stroke-width:${(viewBoxWidth/96).toString()}`);}
         	else {
-        		poly.setAttribute("style", `fill:none;stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);}
+        		poly.setAttribute("style", `fill:none;stroke:red;stroke-linecap:round;stroke-linejoin:round;stroke-width:${(viewBoxWidth/256).toString()}`);}
           }
         if (drawLine == underl)
           {
@@ -933,7 +933,7 @@ const createSvgFace = ((j,zCoord) => {       // both of the following calls work
      if (zCoord < 0)
        if (drawLine == overl)
         {
-         poly.setAttribute("style", `fill:none;stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
+         poly.setAttribute("style", `fill:none;stroke:red;stroke-linecap:round;stroke-linejoin:round;stroke-width:${(viewBoxWidth/256).toString()}`);
         }
   }
     return poly;
@@ -980,9 +980,9 @@ const createSvgTVFace = ((j,zCoord) => {       // both of the following calls wo
         if (drawLine == overl)
           {
         	if (mybackground == "black"){
-        		vpoly.setAttribute("style", `fill:none;stroke:red;stroke-width:${(viewBoxWidth/96).toString()}`);}
+        		vpoly.setAttribute("style", `fill:none;stroke:red;stroke-linecap:round;stroke-linejoin:round;stroke-width:${(viewBoxWidth/96).toString()}`);}
         	else {
-        		vpoly.setAttribute("style", `fill:none;stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);}
+        		vpoly.setAttribute("style", `fill:none;stroke:red;stroke-linecap:round;stroke-linejoin:round;stroke-width:${(viewBoxWidth/256).toString()}`);}
           }
         if (drawLine == underl)
           {
@@ -992,7 +992,7 @@ const createSvgTVFace = ((j,zCoord) => {       // both of the following calls wo
      if (zCoord < 0)
        if (drawLine == overl)
         {
-         	vpoly.setAttribute("style", `fill:none;stroke:red;stroke-width:${(viewBoxWidth/256).toString()}`);
+         	vpoly.setAttribute("style", `fill:none;stroke:red;stroke-linecap:round;stroke-linejoin:round;stroke-width:${(viewBoxWidth/256).toString()}`);
         }
   }
     return vpoly;
