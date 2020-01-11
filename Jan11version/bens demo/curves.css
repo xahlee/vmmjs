@@ -1,0 +1,77 @@
+.site{
+        position: absolute;
+        top: 20px;
+        left: 0px;
+        width: 100vw;
+/*      height: 100vh; */
+
+/*      https://developer.mozilla.org/de/docs/Web/CSS/Media_Queries/Using_media_queries */
+
+}
+
+/* default */
+.site{
+        display:grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        grid-template-rows: auto 10em auto 2em;
+        grid-template-areas:
+                "t t t"
+                "s m1 m2"
+                "s d d"
+                "c c c";
+        }
+@media(orientation:landscape){
+        .site{
+        display:grid;
+        grid-template-columns: 2fr 1fr 1fr;
+        grid-template-rows: auto 10em auto 2em;
+        grid-template-areas:
+                "t t t"
+                "s m1 m2"
+                "s d d"
+                "c c c";
+        }
+}
+@media(orientation:landscape) and (max-width:700px){
+        .site{
+        display:grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto 10em auto 2em;
+        grid-template-areas:
+                "t t"
+                "s m1"
+                "s m2"
+                "d c";
+        }
+}
+.text{
+/* font styles */
+}
+
+#title{
+        background-color:grey;
+        grid-area:t;
+}
+#svgArea{
+        background-color:lightblue;
+        grid-area:s;
+}
+#mySVG{
+background-color:pink;
+}
+#menu{
+        background-color:yellow;
+        grid-area:m1;
+}
+#menu2{
+        background-color:lightgreen;
+        grid-area:m2;
+}
+#description{
+        background-color:orange;
+        grid-area:d;
+}
+#copyright{
+        background-color:grey;
+        grid-area:c;
+}
